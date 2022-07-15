@@ -1,6 +1,27 @@
 #ifndef _LINKED_LIST_H
 #define _LINKED_LIST_H
 
+#define ARRAY_SIZE 80
+
+/*==============================================
+define the node structure of the linked list
+===============================================*/
+typedef struct _node
+{
+	char data[ARRAY_SIZE];
+	struct _node* next;
+	struct _node* prev;
+} node;
+
+/*===============================================
+define the linked list structure
+===============================================*/
+typedef struct _list
+{
+	node* head;
+	node* tail;
+} list;
+
 /*===============================================
 this function removes white spaces from a string
 it gets a pointer to the string it needs to operate on

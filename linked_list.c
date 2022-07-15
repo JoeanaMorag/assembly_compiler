@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "preprocessor.h"
+#include "linked_list.h"
+#include "common.h"
 
 void init(list* main_list)
 {
@@ -108,6 +109,64 @@ int is_list_empty(list* main_list)
 		empty = TRUE;
 		
 	return empty;
+}
+
+
+void remove_white_spaces(char * str)
+{
+	int n = strlen(str);
+	int i = 0, j = -1;
+	int space_found = FALSE;/*flag that sets true if spcae was found*/
+	
+	/*go over leading spaces*/
+	while(++j < n && (str[j] == ' '|| str[j] == '\t'));
+	
+	while(j < n)
+	{
+		if(str[j] != ' ' && str[j] != '\t')
+		{
+			str[i++] = str[j++];
+		
+			space_found = FALSE;
+		}
+		
+		else if(str[j] == ' ' || str[j] == '\t')
+		{	
+			if(space_found == FALSE)
+			{
+				if(str[i] == '.' || str[j] == ',' || str[i] == '#')
+					j++;
+				else
+				{
+					str[i++] = ' ';
+					space_found = TRUE;
+				}
+			}
+			j++;
+		}
+	}
+	str[i] = '\0';
+}
+
+void clean_list(list * main_list)
+{
+	node* ptr;
+	node*  temp;
+	ptr = main_list->head;
+	while(ptr != NULL)
+	{	
+		remove_white_spaces(ptr->data);
+		
+		if(ptr->data[0] == ';' || ptr->data[0] == '\0')
+		{
+			temp = ptr;
+			ptr = ptr->next;
+			delete_node(main_list, temp);
+		}
+		else	
+			ptr = ptr->next;
+	}
+
 }
 
 void terminate(list* main_list)
