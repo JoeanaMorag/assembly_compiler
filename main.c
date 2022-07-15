@@ -37,6 +37,7 @@ the main function gets the files name from the terminal
 int main(int argc, char* argv[])
 {
 	char * read_file_name;
+	char * write_file_name;
 	list new_list;
 	int status;
 	int i = 1;
@@ -52,18 +53,24 @@ int main(int argc, char* argv[])
 			
 			clean_list(&new_list);
 			
-			/*!!!!!*/
+#ifdef PRINT_DEBUG_MILESTONE
 			printf("=============================\n");
 			printf("list after whitespaces remove\n");
 			print_list(&new_list);
+#endif /* PRINT_DEBUG_MILESTONE */
 			
+			write_file_name = file_name_suffix(argv[i], WRITE_FILE_SUFFIX);
+			status = handle_macro(&new_list, write_file_name);
 			
-			status = handle_macro(&new_list, file_name_suffix(argv[i], WRITE_FILE_SUFFIX));
+			free(write_file_name);
 
-			/*printf("=============================\n");
+#ifdef PRINT_DEBUG_MILESTONE
+			printf("=============================\n");
 			printf("list after macro replace\n");
-			print_list(&new_list);NEED TO CREATE NEW FILE*/
-	
+			print_list(&new_list);
+#endif /* PRINT_DEBUG_MILESTONE */
+			
+			/*free memory allocation*/
 			terminate(&new_list);
 			free(read_file_name);
 			i++;

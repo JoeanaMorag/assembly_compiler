@@ -79,7 +79,9 @@ int existing_macro(list* macro_table, char* macro_name, int* table_size)
 		
 	for(i = 0; i < length; i++)
 	{
-		/*printf("macro_name is: %s\n", macro_name);*/
+#ifdef PRINT_DEBUG
+		printf("macro_name is: %s\n", macro_name);
+#endif /* PRINT_DEBUG */
 		if(is_list_empty(&macro_table[i]) == TRUE)
 			break;
 		if(strcmp(macro_name, macro_table[i].head->data) == 0)	
@@ -125,8 +127,10 @@ int macro_replace(list* main_list, list* macro_table, int* table_size)
 	
 	while(ptr != NULL)
 	{
-		/*printf("----------------\n");
-		printf("the line is this: %s\n", ptr->data);*/
+#ifdef PRINT_DEBUG
+		printf("----------------\n");
+		printf("the line is this: %s\n", ptr->data);
+#endif /* PRINT_DEBUG */
 		strcpy(str, ptr->data);
 		macro_name = strtok(str," ");
 		
@@ -136,19 +140,25 @@ int macro_replace(list* main_list, list* macro_table, int* table_size)
 			temp_ptr = ptr;
 			ptr = ptr->next;
 			
-			/*printf("macro flag is ON\n");*/
+#ifdef PRINT_DEBUG
+			printf("macro flag is ON\n");
+#endif /* PRINT_DEBUG */
 			if(strcmp(macro_name,"endmacro") == 0)
 			{
 				delete_node(main_list, temp_ptr);
 				macro_flag = FALSE;
 				macro_array_count++;
-				/*printf("macro flag is OFF\n");*/
+#ifdef PRINT_DEBUG
+				printf("macro flag is OFF\n");
+#endif /* PRINT_DEBUG */
 			}
 			else
 			{
 				add_node(&macro_table[macro_array_count], temp_ptr->data);
 				delete_node(main_list, temp_ptr);
-				/*printf("added node to the list in the array at index %d\n", macro_array_count);*/
+#ifdef PRINT_DEBUG
+				printf("added node to the list in the array at index %d\n", macro_array_count);
+#endif /* PRINT_DEBUG */
 			}
 			
 		}
@@ -159,8 +169,9 @@ int macro_replace(list* main_list, list* macro_table, int* table_size)
 			ptr = ptr->next;
 			
 			macro_name = strtok(NULL," ");
-			/*printf("the macro new macro name is: %s\n", macro_name);*/
-			
+#ifdef PRINT_DEBUG
+			printf("the macro new macro name is: %s\n", macro_name);
+#endif /* PRINT_DEBUG */			
 			macro_name_check = strtok(NULL," ");
 			
 			if((is_macro_saved_word(macro_name) == TRUE) || macro_name_check != NULL)
@@ -181,23 +192,34 @@ int macro_replace(list* main_list, list* macro_table, int* table_size)
 		}
 		else
 		{
-			/*printf("the line is not a macro\n");*/
+#ifdef PRINT_DEBUG
+			printf("the line is not a macro\n");
+#endif /* PRINT_DEBUG */
+
 			macro_index = existing_macro(macro_table, macro_name, table_size);
-			/*printf("macro_index is: %d\n", macro_index);*/
 			
+#ifdef PRINT_DEBUG
+			printf("macro_index is: %d\n", macro_index);
+#endif /* PRINT_DEBUG */			
 			temp_ptr = ptr;
 			ptr = ptr->next;
 			
 			if(macro_index != -1)
 			{
-				/*printf("a macro mention was found (%s)\n", macro_name);*/
+#ifdef PRINT_DEBUG
+				printf("a macro mention was found (%s)\n", macro_name);
+#endif /* PRINT_DEBUG */
 				macro_ptr = macro_table[macro_index].head->next;
 				
 				while(macro_ptr != NULL)
 				{
-					/*printf("before adding a new node\n");*/
+#ifdef PRINT_DEBUG
+					printf("before adding a new node\n");
+#endif /* PRINT_DEBUG */
 					add_middle_node(main_list, temp_ptr->prev, macro_ptr->data);
-					/*printf("the new line in list is: %s\n", temp_ptr->prev->data);*/
+#ifdef PRINT_DEBUG
+					printf("the new line in list is: %s\n", temp_ptr->prev->data);
+#endif /* PRINT_DEBUG */
 					macro_ptr = macro_ptr->next;
 				}
 					
@@ -213,21 +235,28 @@ int handle_macro(list* new_list, char macro_result_file_path[])
 	list* macro_table;
 	int macro_table_size;
 	int status = SUCCESS;
-	
+
+
 	printf("=============================\n");
 	macro_table = macro_array(new_list, &macro_table_size);
+	
+#ifdef PRINT_DEBUG	
 	printf("macro_table of size %d was created\n", macro_table_size);
 		
 	printf("=============================\n");
+#endif /* PRINT_DEBUG */
+
 	if(macro_replace(new_list, macro_table, &macro_table_size) == TRUE)
 	{	
 		status = FAILURE;
 	}
-	printf("macro_table:\n");
-	/*!!!!!*/
-	macro_arr_print(macro_table, macro_table_size);
 	
-	/*!!!!FREE!!!!*/
+#ifdef PRINT_DEBUG_MILESTONE
+	printf("macro_table:\n");
+	macro_arr_print(macro_table, macro_table_size);
+#endif /* PRINT_DEBUG_MILESTONE */
+
+	/*free memory allocation*/
 	macro_array_terminate(macro_table, macro_table_size);
 	free(macro_table);
 			
@@ -254,7 +283,9 @@ void macro_arr_print(list* macro_arr, int table_count)
 	
 	for(i = 0; i < table_count; i++)
 	{	
-		/*printf("num %d list of macro array\n", i);*/
+#ifdef PRINT_DEBUG
+		printf("num %d list of macro array\n", i);
+#endif /* PRINT_DEBUG */
 		print_list(&macro_arr[i]);
 	}
 }
