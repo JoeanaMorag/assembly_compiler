@@ -5,7 +5,9 @@
 #include "common.h"
 #include "macro.h"
 
-
+/*
+************************************** Declerations **************************************
+*/
 
 /*==============================================
 this function count the number of "macro" mentions in a list
@@ -28,6 +30,10 @@ returns TRUE if the macro is a saved word or FLASE otherways
 ===============================================*/
 int is_macro_saved_word(char macro_name[]);
 
+
+/*
+************************************** Implementation **************************************
+*/
 
 int macro_count(list* main_list)
 {
@@ -99,16 +105,39 @@ int is_macro_saved_word(char macro_name[])
 	int length;
 	int i;
 	
-	length = sizeof(saved_words)/sizeof(saved_words[0]);
+	length = sizeof(directives)/sizeof(directives[0]);
 	
 	for(i = 0; i < length; i++)
 	{
-		if(strcmp(macro_name, saved_words[i]) == 0)
+		if(strcmp(macro_name, directives[i]) == 0)
 		{
-			printf("macro name may not be a saved word (%s)", saved_words[i]);
+			printf("macro name may not be a directive (%s)", directives[i]);
 			is_saved_word = TRUE;
 		}
 	}
+	
+	length = sizeof(commands)/sizeof(commands[0]);
+	
+	for(i = 0; i < length; i++)
+	{
+		if(strcmp(macro_name, commands[i]) == 0)
+		{
+			printf("macro name may not be a command (%s)", commands[i]);
+			is_saved_word = TRUE;
+		}
+	}
+	
+	length = sizeof(registers)/sizeof(registers[0]);
+	
+	for(i = 0; i < length; i++)
+	{
+		if(strcmp(macro_name, registers[i]) == 0)
+		{
+			printf("macro name may not be a register name (%s)", registers[i]);
+			is_saved_word = TRUE;
+		}
+	}
+	
 	return is_saved_word;
 }
 

@@ -4,6 +4,11 @@
 #include "linked_list.h"
 #include "common.h"
 #include "macro.h"
+#include "first_pass.h"
+
+/*
+************************************** Declerations **************************************
+*/
 
 /*===============================================
 this function add the right suffix to a certain file name
@@ -28,11 +33,13 @@ return FAILURE if the file fail to oppen, and SUCCESS otherways
 int read_file(list* main_list, char* file_name);
 
 
+/*
+************************************** Implementation **************************************
+*/
+
 /*==============================================
-this program read an unkown amount of text from a given file
-find the macro instructions in it, replce theme with their defenitions
-and prints the processed code to a new .am file
-the main function gets the files name from the terminal
+This function handles all activities in the program
+it gets the files names as a command line arguments
 ===============================================*/
 int main(int argc, char* argv[])
 {
@@ -45,7 +52,8 @@ int main(int argc, char* argv[])
 	if((command_check(argc)) == FAILURE)
 		exit(0);
 	
-	while(i < argc){		
+	while(i < argc)
+	{		
 			read_file_name = file_name_suffix(argv[i], READ_FILE_SUFFIX);
 			
 			if((read_file(&new_list,read_file_name)) == FAILURE)
@@ -63,6 +71,8 @@ int main(int argc, char* argv[])
 			status = handle_macro(&new_list, write_file_name);
 			
 			free(write_file_name);
+			if(status == SUCCESS)
+				first_pass_handel(&new_list);
 
 #ifdef PRINT_DEBUG_MILESTONE
 			printf("=============================\n");
@@ -70,11 +80,12 @@ int main(int argc, char* argv[])
 			print_list(&new_list);
 #endif /* PRINT_DEBUG_MILESTONE */
 			
+			
 			/*free memory allocation*/
 			terminate(&new_list);
 			free(read_file_name);
 			i++;
-		      }
+	 }
 	
 	return 0;
 }

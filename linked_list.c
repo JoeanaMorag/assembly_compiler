@@ -4,6 +4,11 @@
 #include "linked_list.h"
 #include "common.h"
 
+
+/*
+************************************** Implementation **************************************
+*/
+
 void init(list* main_list)
 {
 	main_list->head = NULL;
