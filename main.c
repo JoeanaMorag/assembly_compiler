@@ -124,7 +124,7 @@ int command_check(int argc)
 int read_file(list* main_list, char* file_name)
 {
 	FILE* fd;
-	char data[ARRAY_SIZE] = {'\0'};
+	char data[LINE_SIZE] = {'\0'};
 	int data_size;
 	
 	if(!(fd = fopen(file_name,"r+")))
@@ -135,13 +135,13 @@ int read_file(list* main_list, char* file_name)
 	
 	init(main_list);
 	
-	while(fgets(data, ARRAY_SIZE, fd))
+	while(fgets(data, LINE_SIZE, fd))
 	{
 		data_size = strlen(data);
 		if(data_size > 0 && data[data_size -1] == '\n')
 			data[data_size -1] = '\0';
 		add_node(main_list, data);
-		memset(data,'\0',ARRAY_SIZE);
+		memset(data,'\0',LINE_SIZE);
 		
 	}
 	

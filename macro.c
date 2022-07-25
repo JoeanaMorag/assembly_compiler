@@ -38,7 +38,7 @@ int is_macro_saved_word(char macro_name[]);
 int macro_count(list* main_list)
 {
 	node* ptr= main_list->head;
-	char str[ARRAY_SIZE];
+	char str[LINE_SIZE];
 	char* token;
 	int count = 0;
 	
@@ -146,7 +146,7 @@ int macro_replace(list* main_list, list* macro_table, int* table_size)
 	node* ptr = main_list->head;
 	node* temp_ptr;
 	node* macro_ptr;
-	char str[ARRAY_SIZE];
+	char str[LINE_SIZE];
 	char* macro_name;
 	char* macro_name_check;
 	int macro_index;/*store the macro index in the macro array if found*/

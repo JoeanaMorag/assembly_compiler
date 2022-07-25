@@ -77,7 +77,7 @@ void print_list(list* main_list)
 	ptr = main_list->head;
 	while(ptr != NULL)
 	{
-		printf("%.*s\n", ARRAY_SIZE, ptr->data);
+		printf("%.*s\n", LINE_SIZE, ptr->data);
 		ptr = ptr->next;
 	}
 }
@@ -116,7 +116,6 @@ int is_list_empty(list* main_list)
 	return empty;
 }
 
-
 void remove_white_spaces(char * str)
 {
 	int n = strlen(str);
@@ -139,9 +138,7 @@ void remove_white_spaces(char * str)
 		{	
 			if(space_found == FALSE)
 			{
-				if(str[i] == '.' || str[j] == ',' || str[i] == '#')
-					j++;
-				else
+				if(str[i] != '.' && str[i] != ',' && str[i] != '#')
 				{
 					str[i++] = ' ';
 					space_found = TRUE;

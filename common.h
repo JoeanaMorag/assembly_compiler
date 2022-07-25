@@ -8,6 +8,7 @@
 #define SUCCESS 0
 #define FALSE 0
 #define TRUE 1
+#define NOT_FOUND -1
 
 #define LINE_LENGTH 80
 #define LABLE_LENGTH 30
@@ -29,9 +30,9 @@ static char * directives [] = {".data", ".string", ".struct", ".entry", ".extern
 /*===============================================
 define the list of commands saved words
 ===============================================*/
-static char * commands [] = {"hlt", "rts", "jsr", "prn", "get", "bne",
-					  "jmp", "dec", "inc", "clr", "not", "lea",
-					  "sub", "add", "cmp", "mov"};
+static char * commands [] = {"mov", "cmp", "add", "sub", "not", "clr",
+							 "lea", "inc", "dec", "jmp", "bne", "get",
+							 "prn", "jsr", "rts", "hlt"};
 
 /*===============================================
 define the list of saved registers names
