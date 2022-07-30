@@ -20,6 +20,7 @@ LOOP+:		jmp	END
 		get #5
 		lea #4,r1
 		mov r1,#1
+		.string ""
 2END:		hlt
 OMER:		add E23.1s,str
 r4:			LOOP

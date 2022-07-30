@@ -13,7 +13,8 @@
 #define LINE_LENGTH 80
 #define LABLE_LENGTH 30
 #define MACHINE_RAM 256
-
+#define BITS_RESET 1023
+#define WORD_SIZE 10
 
 #define READ_FILE_SUFFIX ".as"
 #define WRITE_FILE_SUFFIX ".am"
