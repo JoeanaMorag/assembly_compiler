@@ -13,7 +13,6 @@ LOOP:		jmp	END
 		sub	r1,r4
 		m1
 		bne	LOOP
-		add #4,S1.2
 END:		hlt
 STR:		.string "abcdef"
 LENGTH:		.data	6,-9,15

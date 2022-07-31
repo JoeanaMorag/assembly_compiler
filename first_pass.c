@@ -86,6 +86,9 @@ void insert_str_data(char str[], int data_arr[], int* dc);
 void encode_first_word(int instruct_arr[], int* ic, int command, int source_address_methood,
 					   int dest_address_methood);
 
+void encode_operands(int instruct_arr[], int* ic, int source_address_methood, char* op_source1,
+					 char* op_source2, int dest_address_methood, char* op_dest1, char* op_dest2);
+
 /*-----------------------*/
 
 /*==============================================
@@ -260,6 +263,10 @@ int first_pass_handel(list * main_list)
 			encode_first_word(instruct_arr, &ic, line_command, op_sour_address_methood,
 							  op_des_address_methood);
 			
+			/*add number of words and encoding of registers and numbers*/
+			encode_operands(instruct_arr, &ic, op_sour_address_methood, op_source1, op_source2,
+							op_des_address_methood, op_dest1, op_dest2);
+
 			printf("the ic array is:\n");
 			print_ic_arr(instruct_arr, ic);
 		}
@@ -382,7 +389,7 @@ int insert_num_data(char op_str[], int data_arr[], int* dc)
 	
 	while(num_token)
 	{
-		status = parse_int(num_token, /*(int*)*/&data_arr[*dc]);
+		status = parse_int(num_token, &data_arr[*dc]);
 		
 		if(status == FAILURE)
 			break;
@@ -444,6 +451,77 @@ void encode_first_word(int instruct_arr[], int* ic, int command, int source_addr
 	instruct_arr[*ic] = final_word;
 	*ic = *ic + 1;
 	
+}
+
+void encode_operands(int instruct_arr[], int* ic, int source_address_methood, char* op_source1,
+					 char* op_source2, int dest_address_methood, char* op_dest1, char* op_dest2)
+{
+	int dest;
+	int source;
+	int final_word;
+	printf("source_address_methood is (%d)\n", source_address_methood);
+	printf("dest_address_methood is (%d)\n", dest_address_methood);
+	
+	if(source_address_methood == REGISTER && dest_address_methood == REGISTER)
+	{
+		source = is_register(op_source1);
+		dest   = is_register(op_dest1);
+		
+		source = source << 6;
+		dest   = dest   << 2;
+		
+		final_word = source | dest;
+		
+		instruct_arr[*ic] = final_word;
+		*ic = *ic + 1;
+	}
+	else if(op_dest1 != NULL)/*the command has at least one operand*/
+	{
+		if(op_source1 != NULL)
+		{
+			if(source_address_methood == IMMEDIATE)
+			{
+				parse_int(op_source1, &source);
+				source = source << 2;
+				instruct_arr[*ic] = source;
+			}
+			else if(source_address_methood == REGISTER)
+			{
+				source = is_register(op_source1);
+				source = source << 6;
+				instruct_arr[*ic] = source;
+			}
+			else if(source_address_methood == STRUCT)
+			{
+				*ic = *ic + 1; /*save a spot to the label address*/
+				
+				parse_int(op_source2, &source);/*encode the field number*/
+				source = source << 2;
+				instruct_arr[*ic] = source;
+			}
+			
+			*ic = *ic + 1;
+		}
+		
+		if(dest_address_methood == IMMEDIATE)
+		{
+			parse_int(op_dest1, &dest);
+			dest = dest << 2;
+			instruct_arr[*ic] = dest;
+		}
+		else if(dest_address_methood == REGISTER)
+		{
+			dest = is_register(op_dest1);
+			dest = dest << 2;
+			instruct_arr[*ic] = dest;
+		}
+		else if(dest_address_methood == STRUCT)
+		{
+			*ic = *ic + 1; /*save a spot to the label address*/
+			parse_int(op_dest2, &instruct_arr[*ic]);/*encode the field number*/
+		}
+		*ic = *ic + 1;
+	}
 }
 
 int legal_label(char label_name[], int line_num)
@@ -584,14 +662,14 @@ int is_directive(char expression[])
 int is_register(char expression[])
 {
 	int i;
-	int is_register = FALSE;
-	int length = sizeof(registers)/sizeof(registers[0]);;
+	int is_register = NOT_FOUND;
+	int length = sizeof(registers)/sizeof(registers[0]);
 	
 	
 	for(i = 0; i < length; i++)
 	{
 		if(strcmp(registers[i], expression) == 0)
-			is_register = TRUE;	
+			is_register = i;	
 	}
 	return is_register;
 }
@@ -866,7 +944,7 @@ int find_address_methood(char operand[], int* address_methood, int command, int 
 			
 			*address_methood = STRUCT_ACCESS;
 		}
-		else if(is_register(operand) == TRUE)
+		else if(is_register(operand) != NOT_FOUND)
 		{
 			*address_methood = REGISTER;
 		}
@@ -1263,6 +1341,8 @@ void print_dc_arr(int array[], int dc)
 void print_ic_arr(int array[], int ic)
 {
 	int i;
+	
+	printf("ic value is: %d\n", ic);
 	
 	for(i = 100; i< ic; i++)
 	{
