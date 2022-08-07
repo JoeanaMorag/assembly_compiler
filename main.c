@@ -5,6 +5,7 @@
 #include "common.h"
 #include "macro.h"
 #include "first_pass.h"
+#include "second_pass.h"
 
 /*
 ************************************** Declerations **************************************
@@ -46,6 +47,15 @@ int main(int argc, char* argv[])
 	char * read_file_name;
 	char * write_file_name;
 	list new_list;
+	
+	label* label_table = NULL;
+	char** label_by_index = NULL;/*store index for missing label in first pass*/
+	int label_count = 0;
+	int data_arr[MACHINE_RAM] = {0};
+	int instruct_arr[MACHINE_RAM] = {0};
+	int ic = 100;/*memory image starts from address 100*/
+	int dc = 0;
+	
 	int status;
 	int i = 1;
 	
@@ -72,8 +82,13 @@ int main(int argc, char* argv[])
 			
 			free(write_file_name);
 			if(status == SUCCESS)
-				first_pass_handel(&new_list);
-
+				status = first_pass_handel(&new_list, data_arr, instruct_arr,&dc, &ic, &label_table,
+								  &label_by_index, &label_count);
+			
+			if(status == SUCCESS)
+				status = second_pass_handler(instruct_arr, ic, data_arr, dc, label_table, label_count,
+											 label_by_index, argv[i]);
+			
 #ifdef PRINT_DEBUG_MILESTONE
 			printf("=============================\n");
 			printf("list after macro replace\n");
@@ -82,6 +97,9 @@ int main(int argc, char* argv[])
 			
 			
 			/*free memory allocation*/
+			free(label_table);/*free label table allocation*/
+			free_label_by_index(label_by_index, label_count);
+			free(label_by_index);
 			terminate(&new_list);
 			free(read_file_name);
 			i++;
@@ -150,10 +168,10 @@ int read_file(list* main_list, char* file_name)
 
 }
 
-int write_file(list* main_list, char* file_name)
+int write_file(void* main_list, char* file_name)
 {
 	FILE* fd;
-	node* ptr = main_list->head;
+	node* ptr = ((list*)main_list)->head;
 	
 	if(!(fd = fopen(file_name,"w+")))
 	{

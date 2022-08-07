@@ -12,6 +12,7 @@ LOOP+:		jmp	END
 		prn	#-5
 		sub	r1,r4
 		m1
+		add TT,r1
 		bne	LOOP
 		rts r1
 		mov

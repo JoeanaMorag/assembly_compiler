@@ -121,30 +121,50 @@ void remove_white_spaces(char * str)
 	int n = strlen(str);
 	int i = 0, j = -1;
 	int space_found = FALSE;/*flag that sets true if spcae was found*/
+	int str_flag = FALSE;/*flag that sets true if the code is part of a string*/
 	
 	/*go over leading spaces*/
 	while(++j < n && (str[j] == ' '|| str[j] == '\t'));
 	
 	while(j < n)
 	{
-		if(str[j] != ' ' && str[j] != '\t')
+		if(str_flag == TRUE)
 		{
-			str[i++] = str[j++];
-		
-			space_found = FALSE;
-		}
-		
-		else if(str[j] == ' ' || str[j] == '\t')
-		{	
-			if(space_found == FALSE)
+			if(str[j] == '"')/*turn off string flag*/
 			{
-				if(str[i] != '.' && str[i] != ',' && str[i] != '#')
-				{
-					str[i++] = ' ';
-					space_found = TRUE;
-				}
+				str[i++] = str[j++];
+				str_flag = FALSE;
 			}
-			j++;
+			else
+				str[i++] = str[j++];
+		}
+		else
+		{
+			if(str[j] == '"')/*turn on string flag*/
+			{
+				str[i++] = str[j++];
+				str_flag = TRUE;
+			}
+			else if(str[j] != ' ' && str[j] != '\t')
+			{
+				str[i++] = str[j++];		
+				space_found = FALSE;
+			}
+			else if(str[j] == ' ' || str[j] == '\t')
+			{	
+				if(space_found == FALSE)
+				{
+					if(i > 0)
+					{
+						if(str[i - 1] != '.' && str[i - 1] != ',' && str[i - 1] != '#')
+						{
+							str[i++] = ' ';
+							space_found = TRUE;
+						}
+					}
+				}
+				j++;
+			}
 		}
 	}
 	str[i] = '\0';

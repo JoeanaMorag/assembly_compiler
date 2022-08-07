@@ -8,33 +8,31 @@
 /*
 ************************************** Declerations **************************************
 */
+/*===============================================
+define the list of directives saved words
+===============================================*/
+char * directives [5] = {".data", ".string", ".struct", ".entry", ".extern"};
 
+/*===============================================
+define the list of commands saved words
+===============================================*/
+char * commands [16] = {"mov", "cmp", "add", "sub", "not", "clr",
+					 "lea", "inc", "dec", "jmp", "bne", "get",
+					 "prn", "jsr", "rts", "hlt"};
+
+/*===============================================
+define the list of saved registers names
+===============================================*/
+char * registers [8] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"};
+
+/*
+************************************** Implementation **************************************
+*/
 /*==============================================
 this function count the number of "macro" mentions in a list
 it gets a pointer to the list it needs to check
 returns the number of "macro" mentions in the list
 ===============================================*/
-int macro_count(list* main_list);
-
-/*==============================================
-this function check if a given macro is alredy stored in the macro array
-it gets a pointer to the macro table, a pointer to the macro name and the macr table size
-returns the index in the table if the macro exist in it or -1 otherways
-===============================================*/
-int existing_macro(list* macro_table, char* macro_name, int* table_size);
-
-/*==============================================
-this function check if a macro name is a saed word
-it gets the string of the macro name
-returns TRUE if the macro is a saved word or FLASE otherways
-===============================================*/
-int is_macro_saved_word(char macro_name[]);
-
-
-/*
-************************************** Implementation **************************************
-*/
-
 int macro_count(list* main_list)
 {
 	node* ptr= main_list->head;
@@ -76,6 +74,11 @@ list* macro_array(list* main_list, int* count_size)
 	return macro_array;
 }
 
+/*==============================================
+this function check if a given macro is alredy stored in the macro array
+it gets a pointer to the macro table, a pointer to the macro name and the macr table size
+returns the index in the table if the macro exist in it or -1 otherways
+===============================================*/
 int existing_macro(list* macro_table, char* macro_name, int* table_size)
 {
 	int i, length;
@@ -99,6 +102,11 @@ int existing_macro(list* macro_table, char* macro_name, int* table_size)
 	
 }
 
+/*==============================================
+this function check if a macro name is a saed word
+it gets the string of the macro name
+returns TRUE if the macro is a saved word or FLASE otherways
+===============================================*/
 int is_macro_saved_word(char macro_name[])
 {
 	int is_saved_word = FALSE;
@@ -291,7 +299,7 @@ int handle_macro(list* new_list, char macro_result_file_path[])
 			
 	if(status == SUCCESS)
 	{
-		write_file(new_list,macro_result_file_path);
+		write_file((void*)new_list,macro_result_file_path);
 	}
 	
 	return status;

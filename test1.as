@@ -1,6 +1,6 @@
-	.extern sRR
-	.extern GOV
-	.entry END
+;	.extern sRR
+;	.extern GOV
+;	.entry END
 MAIN:		mov	S1.1, LENGTH
 		add	r2,STR
 LOOP:		jmp	END
@@ -14,7 +14,7 @@ LOOP:		jmp	END
 		m1
 		bne	LOOP
 END:		hlt
-STR:		.string "abcdef"
+STR:		.string "abc	def"
 LENGTH:		.data	6,-9,15
 K:		.data	22
 S1:		.struct	8,"ab"

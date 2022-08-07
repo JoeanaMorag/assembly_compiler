@@ -15,6 +15,7 @@
 #define MACHINE_RAM 256
 #define BITS_RESET 1023
 #define WORD_SIZE 10
+#define MEMORY_LODING_PLACE 100
 
 #define READ_FILE_SUFFIX ".as"
 #define WRITE_FILE_SUFFIX ".am"
@@ -22,30 +23,36 @@
 #define ENTRIES_FILE_SUFFIX ".ent"
 #define EXTERNALS_FILE_SUFFIX ".ext"
 
-
-/*===============================================
-define the list of directives saved words
+/*==============================================
+define the label structure for the label table
 ===============================================*/
-static char * directives [] = {".data", ".string", ".struct", ".entry", ".extern"};
-
-/*===============================================
-define the list of commands saved words
-===============================================*/
-static char * commands [] = {"mov", "cmp", "add", "sub", "not", "clr",
-							 "lea", "inc", "dec", "jmp", "bne", "get",
-							 "prn", "jsr", "rts", "hlt"};
-
-/*===============================================
-define the list of saved registers names
-===============================================*/
-static char * registers [] = {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "PSW"};
+typedef struct labels_struct
+{
+	char name[LABLE_LENGTH];
+	int address;
+	int label_type;
+	int is_defined;
+	int is_extern;
+	int is_entry;
+} label;
 
 /*==============================================
-this function write the text from a list to a new or existing file
-it gets a list type from which it takes the text, and a file name to give to the new file
-return FAILURE if the file fail to oppen, and SUCCESS otherways
+this function write text from a list to a new or existing file
 ===============================================*/
-int write_file(list* main_list, char* file_name);
+int write_file(void* main_list, char* file_name);
+
+/*==============================================
+this function combine a file name with the givven suffix
+===============================================*/
+char * file_name_suffix(char *argv, char data[]);
+
+/*==============================================
+debugging
+===============================================*/
+void print_lable_table(label label_table[], int label_count);
+void print_dc_arr(int array[], int dc);
+void print_ic_arr(int array[], int ic);
+void print_in_bits(int num, int num_of_bits);
 
 #endif /*_COMMEN_H*/
 
