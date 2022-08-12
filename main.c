@@ -69,6 +69,9 @@ int main(int argc, char* argv[])
 			if((read_file(&new_list,read_file_name)) == FAILURE)
 				exit(0);
 			
+			printf("=============================\n");
+			printf("file (%s)\n", read_file_name);
+			
 			clean_list(&new_list);
 			
 #ifdef PRINT_DEBUG_MILESTONE
@@ -82,19 +85,23 @@ int main(int argc, char* argv[])
 			
 			free(write_file_name);
 			if(status == SUCCESS)
+			{
 				status = first_pass_handel(&new_list, data_arr, instruct_arr,&dc, &ic, &label_table,
 								  &label_by_index, &label_count);
+			}
 			
 			if(status == SUCCESS)
+			{
 				status = second_pass_handler(instruct_arr, ic, data_arr, dc, label_table, label_count,
 											 label_by_index, argv[i]);
+			}
 			
 #ifdef PRINT_DEBUG_MILESTONE
 			printf("=============================\n");
 			printf("list after macro replace\n");
 			print_list(&new_list);
 #endif /* PRINT_DEBUG_MILESTONE */
-			
+			printf("=============================\n");
 			
 			/*free memory allocation*/
 			free(label_table);/*free label table allocation*/
@@ -103,6 +110,7 @@ int main(int argc, char* argv[])
 			terminate(&new_list);
 			free(read_file_name);
 			i++;
+			
 	 }
 	
 	return 0;

@@ -9,7 +9,7 @@ returns SUCCESS if no errors were found and a file has been created, or FAILURE 
 int handle_macro(list* new_list, char macro_result_file_path[]);
 
 /*==============================================
-this function allocate memory for a macro table to a givven code text
+this function allocate memory for a macro table to a given code text
 ===============================================*/
 list* macro_array(list* main_list, int* count_size);
 

@@ -70,6 +70,10 @@ int find_label_address(int index, char** label_by_index, label* label_table, int
 	return address;
 }
 
+
+/*==============================================
+this function extract certain bits out of the word given
+===============================================*/
 int extract_num_bits(int word, int start_bit)
 {
 	int num_bits;
@@ -82,6 +86,10 @@ int extract_num_bits(int word, int start_bit)
 	return num_bits;
 }
 
+
+/*==============================================
+this function convert a word to base 32
+===============================================*/
 void num_convert_to_32(int word, char base32_num[])
 {
 	/*reads digits from left to right*/
@@ -105,6 +113,9 @@ void insert_extern(list* extern_list, int address, char* label_name)
 	add_node(extern_list, node_data);
 }
 
+/*==============================================
+this function create a new .ext file
+===============================================*/
 int print_ext_file(char* file_name, list* extern_list)
 {
 	FILE * fp;
@@ -133,6 +144,9 @@ int print_ext_file(char* file_name, list* extern_list)
 	return status;
 }
 
+/*==============================================
+this function create a new .ent file
+===============================================*/
 int print_ent_file(char* file_name, label* label_table, int label_count)
 {
 	FILE * fp;
@@ -166,6 +180,9 @@ int print_ent_file(char* file_name, label* label_table, int label_count)
 	return status;
 }
 
+/*==============================================
+this function create a new .ob file
+===============================================*/
 int print_ob_file(char* file_name, int instruct_arr[], int ic, int data_arr[], int dc)
 {
 	FILE * fp;
@@ -216,6 +233,10 @@ int print_ob_file(char* file_name, int instruct_arr[], int ic, int data_arr[], i
 	return status;
 }
 
+/*==============================================
+this function handles the second pass of the .am file
+it fills the missing labels addresses, and compute the output .ob, .en, .ext files
+===============================================*/
 int second_pass_handler(int instruct_arr[], int ic, int data_arr[], int dc, label* label_table,
 					    int label_count, char** label_by_index, char file_name[])
 {

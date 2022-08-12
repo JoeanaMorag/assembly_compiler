@@ -93,7 +93,8 @@ void delete_node (list * main_list, node* some_node)
 	{
 		if(main_list->head == main_list->tail)
 			main_list->tail = NULL;
-		some_node->next->prev = NULL;
+		else
+			some_node->next->prev = NULL;
 		main_list->head = some_node->next;
 		free(some_node);
 		return;
@@ -114,6 +115,20 @@ int is_list_empty(list* main_list)
 		empty = TRUE;
 		
 	return empty;
+}
+
+node* find_in_list(list* main_list, char str[])
+{
+	node* ptr = main_list->head;
+	
+	while(ptr != NULL)
+	{
+		if(strcmp(ptr->data, str) == 0)
+			break;
+		ptr = ptr->next;
+	}
+	
+	return ptr;
 }
 
 void remove_white_spaces(char * str)
@@ -147,7 +162,12 @@ void remove_white_spaces(char * str)
 			}
 			else if(str[j] != ' ' && str[j] != '\t')
 			{
-				str[i++] = str[j++];		
+				if((str[j] == ',') && space_found == TRUE)
+				{
+					str[i - 1] = str[j++];
+				}
+				else
+					str[i++] = str[j++];		
 				space_found = FALSE;
 			}
 			else if(str[j] == ' ' || str[j] == '\t')
@@ -167,7 +187,15 @@ void remove_white_spaces(char * str)
 			}
 		}
 	}
-	str[i] = '\0';
+	
+	if(i > 0)
+	{
+		/*delete ending space*/
+		if(str[i - 1] == ' ' || str[i - 1] == '\t')
+			str[i - 1] = '\0';
+		else
+			str[i] = '\0';
+	}
 }
 
 void clean_list(list * main_list)

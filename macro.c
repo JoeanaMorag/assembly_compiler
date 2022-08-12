@@ -53,6 +53,9 @@ int macro_count(list* main_list)
 	return count;
 }
 
+/*==============================================
+this function allocate memory for a macro table to a given code text
+===============================================*/
 list* macro_array(list* main_list, int* count_size)
 {
 	list* macro_array;
@@ -97,9 +100,7 @@ int existing_macro(list* macro_table, char* macro_name, int* table_size)
 			macro_index = i;
 	}
 	
-	
 	return macro_index;
-	
 }
 
 /*==============================================
@@ -149,6 +150,10 @@ int is_macro_saved_word(char macro_name[])
 	return is_saved_word;
 }
 
+/*==============================================
+this function find and replace macro instructions in a linked list
+returns TRUE if an error was found in the process of FLASE otherways
+===============================================*/
 int macro_replace(list* main_list, list* macro_table, int* table_size)
 {
 	node* ptr = main_list->head;
@@ -267,14 +272,17 @@ int macro_replace(list* main_list, list* macro_table, int* table_size)
 	return error_flag;			
 }
 
+/*==============================================
+this function handles the spread of macro instructions in the code file
+and create a new ".am" file upon success
+returns SUCCESS if no errors were found and a file has been created, or FAILURE otherways
+===============================================*/
 int handle_macro(list* new_list, char macro_result_file_path[])
 {
 	list* macro_table;
 	int macro_table_size;
 	int status = SUCCESS;
 
-
-	printf("=============================\n");
 	macro_table = macro_array(new_list, &macro_table_size);
 	
 #ifdef PRINT_DEBUG	
@@ -305,6 +313,9 @@ int handle_macro(list* new_list, char macro_result_file_path[])
 	return status;
 }
 
+/*==============================================
+this function delete the macro table and free the memory allocation
+===============================================*/
 void macro_array_terminate(list* macro_array, int table_count)
 {
 	int i;
@@ -314,6 +325,9 @@ void macro_array_terminate(list* macro_array, int table_count)
 	}
 }
 
+/*==============================================
+this function prints the content of the macro array 
+===============================================*/
 void macro_arr_print(list* macro_arr, int table_count)
 {
 	int i;

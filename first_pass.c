@@ -5,13 +5,16 @@
 #include "linked_list.h"
 #include "common.h"
 
-extern char * directives[5];
-extern char * commands[16];
-extern char * registers[8];
-
 /*
 ************************************** Declerations **************************************
 */
+
+/*==============================================
+save words arrays
+===============================================*/
+extern char * directives[5];
+extern char * commands[16];
+extern char * registers[8];
 
 /*==============================================
 commands ordered by their opcode
@@ -24,14 +27,14 @@ directive instructions
 ===============================================*/
 enum DIRECTIVES {DATA, STRING, STRUCT};
 
-enum LINE_TYPES {COMMAND, DIRECTIVE};
-
-enum LABEL_TYPES {DATA_TYPE, CODE_TYPE};
-
 /*==============================================
 addressing methood for operands
 ===============================================*/
 enum ADDRESSING_METHOODS {IMMEDIATE, DIRECT, STRUCT_ACCESS, REGISTER};
+
+enum LINE_TYPES {COMMAND, DIRECTIVE};
+
+enum LABEL_TYPES {DATA_TYPE, CODE_TYPE};
 
 enum OPERAND_DIRECTION {SOURCE, DEST};
 
@@ -50,6 +53,9 @@ this function builds an index array for the labels that needs to be encode in th
 ===============================================*/
 char** build_label_by_index(int label_count);
 
+/*==============================================
+this function free the label by index array
+===============================================*/
 void free_label_by_index(char** label_by_index, int label_count);
 
 /*==============================================
@@ -59,24 +65,36 @@ returns SUCCESS in case the parse complited with no errors, or FAILURE otherways
 ===============================================*/
 int parse_line(char data[], label* label_table,int* out_label_index, int* label_count, int* line_type,
 			   int* line_command,char** out_op_source1, char** out_op_source2, char** out_op_dest1,
-			   char** out_op_dest2, int* op_s_address_methood, int* op_d_address_methood, int line_num);
+			   char** out_op_dest2, int* op_s_address_methood, int* op_d_address_methood, int line_num,
+			   list* undefine_labels);
 
+/*==============================================
+this function insert int data to the data array
+===============================================*/
 int insert_num_data(char op_str[], int data_arr[], int* dc);
 
+/*==============================================
+this function insert string data to the data array
+===============================================*/
 void insert_str_data(char str[], int data_arr[], int* dc);
 
+/*==============================================
+this function encode the first word of the instruction
+===============================================*/
 void encode_first_word(int instruct_arr[], int* ic, int command, int source_address_methood,
 					   int dest_address_methood);
 
+/*==============================================
+this function encode the operands of the instruction
+===============================================*/
 void encode_operands(int instruct_arr[], int* ic, int source_address_methood, char* op_source1,
 					 char* op_source2, int dest_address_methood, char* op_dest1, char* op_dest2,
-					 char** label_by_index, int label_count);
+					 char** label_by_index, int label_count, list* undefine_labels, label* label_table);
 
+/*==============================================
+this function checks if all the labels in the label tabel were define
+===============================================*/
 int label_defin_check(label* label_table, int label_count);
-
-void encode_first_word(int instruct_arr[], int* ic, int command, int source_address_methood,
-					   int dest_address_methood);
-
 
 
 /*
@@ -89,6 +107,7 @@ int first_pass_handel(list * main_list, int data_arr[], int instruct_arr[], int*
 	int line_num = 1; /*code lines starts from 1*/
 	char line[LINE_SIZE];
 	label* label_table = NULL;
+	list undefine_labels;/*store labels that are not yet define*/
 	
 	node* ptr = main_list->head;
 	
@@ -107,28 +126,24 @@ int first_pass_handel(list * main_list, int data_arr[], int instruct_arr[], int*
 	char* op_dest1 = NULL;
 	char* op_dest2 = NULL;
 	
+	int parse_status = SUCCESS;
 	int status = SUCCESS;
 	int i;
 	
 	label_table = build_label_table(main_list, label_count);
 	*label_by_index = build_label_by_index(*label_count);
-
-#ifdef PRINT_DEBUG
-	printf("test for label table first name after initiation: %s\n", label_table[0].name);
-#endif /* PRINT_DEBUG */
-	
+	init(&undefine_labels);
 	
 	while(ptr != NULL)
 	{
 		strcpy(line, ptr->data);
 		
-		status = parse_line(line, label_table, &label_index, &label_table_count, &line_type, &line_command,
+		parse_status = parse_line(line, label_table, &label_index, &label_table_count, &line_type, &line_command,
 						    &op_source1, &op_source2, &op_dest1, &op_dest2, &op_sour_address_methood,
-							&op_des_address_methood, line_num);
+							&op_des_address_methood, line_num, &undefine_labels);
 
-		if(line_type == DIRECTIVE && status == SUCCESS)
+		if(line_type == DIRECTIVE && parse_status == SUCCESS)
 		{
-			printf("label_index is: %d\n", label_index);
 			/*update the data array*/
 			if(label_index != NOT_FOUND)/*store the address for the label*/
 			{
@@ -151,7 +166,7 @@ int first_pass_handel(list * main_list, int data_arr[], int instruct_arr[], int*
 				insert_num_data(op_source1, data_arr, dc);
 			}
 		}
-		else if(line_type == COMMAND && status == SUCCESS)
+		else if(line_type == COMMAND && parse_status == SUCCESS)
 		{
 			/*update the data array*/
 			if(label_index != NOT_FOUND)/*store the address for the label*/
@@ -164,16 +179,21 @@ int first_pass_handel(list * main_list, int data_arr[], int instruct_arr[], int*
 							  op_des_address_methood);
 			
 			/*add number of words and encoding of registers and numbers*/
-			encode_operands(instruct_arr, ic, op_sour_address_methood, op_source1, op_source2,
-							op_des_address_methood, op_dest1, op_dest2, *label_by_index, *label_count);
+			encode_operands(instruct_arr, ic, op_sour_address_methood, op_source1, op_source2, op_des_address_methood,
+							op_dest1, op_dest2, *label_by_index, *label_count, &undefine_labels, label_table);
 		}
 		
-		if(status == SUCCESS)/*free operands allocation*/
+		if(parse_status == SUCCESS)/*free operands allocation*/
 		{
 			free(op_source1);
 			free(op_source2);
 			free(op_dest1);
 			free(op_dest2);
+		}
+		else
+		{
+			/*free(label_table);*/
+			status = FAILURE;
 		}
 		
 		ptr = ptr->next;
@@ -182,17 +202,22 @@ int first_pass_handel(list * main_list, int data_arr[], int instruct_arr[], int*
 #ifdef PRINT_DEBUG_MILESTONE
 	printf("the label_table in first pass is:\n");
 	print_lable_table(label_table, *label_count);
-
 	printf("the ic array is:\n");
 	print_ic_arr(instruct_arr, *ic);
-
 	printf("the dc array is:\n");
 	print_dc_arr(data_arr, *dc);
+	printf("this is the undefine_labels list:\n");
+	print_list(&undefine_labels);
+	printf("status before label define check is: %d\n", status);
 #endif /* PRINT_DEBUG_MILESTONE */
 
 	/*check that all the labels where define or had declared as extern*/
-	status = label_defin_check(label_table, label_table_count);
-
+	if((label_defin_check(label_table, label_table_count) == FAILURE) || undefine_labels.head != NULL)
+	{
+		status = FAILURE;
+		terminate(&undefine_labels);
+	}
+	
 	/*update data type labels with ic counter*/
 	for(i = 0; i < *label_count; i++)
 	{
@@ -205,6 +230,9 @@ int first_pass_handel(list * main_list, int data_arr[], int instruct_arr[], int*
 	return status;
 }
 
+/*==============================================
+this function count the number of labels in the code
+===============================================*/
 int label_counter(list* main_list)
 {
 	node* ptr= main_list->head;
@@ -217,7 +245,8 @@ int label_counter(list* main_list)
 		strcpy(str, ptr->data);
 		first_word = strtok(str," ");
 		
-		if((first_word[strlen(first_word)-1] == ':') || (strcmp(first_word, ".extern") == 0))
+		if((first_word[strlen(first_word)-1] == ':') || (strcmp(first_word, ".extern") == 0) ||
+			(strcmp(first_word, ".entry") == 0))
 		{	
 #ifdef PRINT_DEBUG
 			printf("this word is a label: %s\n", first_word);
@@ -230,6 +259,9 @@ int label_counter(list* main_list)
 	return count;
 }
 
+/*==============================================
+this function build the label table array acording to the label count
+===============================================*/
 label * build_label_table(list* main_list, int* label_count)
 {
 	label* label_table = NULL;
@@ -254,6 +286,9 @@ label * build_label_table(list* main_list, int* label_count)
 	return label_table;
 } 
 
+/*==============================================
+this function build the label by index array acording to the label count
+===============================================*/
 char** build_label_by_index(int label_count)
 {
 	char** new_array = NULL;
@@ -301,9 +336,13 @@ int label_defin_check(label* label_table, int label_count)
 			check = FAILURE;
 		}
 	}
+	
 	return check;
 }
 
+/*==============================================
+this function checks the string given is a alphanumeric
+===============================================*/
 int is_alphanumeric(char label_name[])
 {
 	int alphanumeric = TRUE;
@@ -320,6 +359,9 @@ int is_alphanumeric(char label_name[])
 	return alphanumeric;
 }
 
+/*==============================================
+this function checks if the string given is a saved word
+===============================================*/
 int is_label_saved_word(char label_name[])
 {
 	int is_saved_word = FALSE;
@@ -356,6 +398,9 @@ int is_label_saved_word(char label_name[])
 	return is_saved_word;
 }
 
+/*==============================================
+this function checks if the expression given is a register
+===============================================*/
 int is_register(char expression[])
 {
 	int i;
@@ -371,6 +416,9 @@ int is_register(char expression[])
 	return is_register;
 }
 
+/*==============================================
+this function checks if the expression given is a command instruction
+===============================================*/
 int is_command(char expression[])
 {
 	int i;
@@ -386,6 +434,9 @@ int is_command(char expression[])
 	return is_command;
 }
 
+/*==============================================
+this function checks if the expression given is a directive instruction
+===============================================*/
 int is_directive(char expression[])
 {
 	int i;
@@ -543,7 +594,7 @@ int legal_data_direct(char data_str[], int line_num)
 
 	if(data_str[0] == ',')
 	{
-		printf("Erorr in line (%d), .data directive may not start with comma\n", line_num);
+		printf("Erorr in line (%d): .data directive may not start with comma\n", line_num);
 		legal_data = FALSE;
 	}
 	
@@ -551,7 +602,7 @@ int legal_data_direct(char data_str[], int line_num)
 	{
 		if((isdigit(data_str[i]) == 0) && (data_str[i] != ',') && (data_str[i] != '-') && (data_str[i] !='+'))
 		{
-			printf("Erorr in line (%d), .data directive may not get this (%c)\n", line_num, data_str[i]);
+			printf("Erorr in line (%d): .data directive may not get this (%c)\n", line_num, data_str[i]);
 			legal_data = FALSE;
 			break;
 		}
@@ -559,7 +610,7 @@ int legal_data_direct(char data_str[], int line_num)
 		{
 			if(data_str[i-1] == data_str[i])
 			{
-				printf("Erorr in line (%d), double %c in .data directive\n", line_num, data_str[i]);
+				printf("Erorr in line (%d): double \"%c\" in .data directive\n", line_num, data_str[i]);
 				legal_data = FALSE;
 				break;
 			}
@@ -577,14 +628,14 @@ int legal_str_direct(char str_str[], int line_num)
 	
 	if(str_str[0] != '"' || str_str[length - 1] != '"')
 	{
-		printf("Erorr in line (%d), string must start or end with \"\n", line_num);
+		printf("Erorr in line (%d): string must start or end with \"\n", line_num);
 		legal_str = FALSE;
 	}
 	for(i = 1; i < length - 1; i++)
 	{
-		if((str_str[i] < 32) || (str_str[i] > 126))/*illegal ASCII value*/
+		if(((str_str[i] < 32) || (str_str[i] > 126)) && (str_str[i] != '\t'))/*illegal ASCII value*/
 		{
-			printf("Erorr in line (%d), illegal value in .string directive\n", line_num);
+			printf("Erorr in line (%d): illegal value in .string directive\n", line_num);
 			legal_str = FALSE;
 			break;
 		}
@@ -602,7 +653,7 @@ int legal_struct_direct(char struct_str[], int line_num)
 	scan_status = sscanf(struct_str, "%d,%[^\n]", &number, string);
 	if(scan_status == 0)
 	{
-		printf("Erorr in line (%d), .struct directive must start with an int\n", line_num);
+		printf("Erorr in line (%d): .struct directive must start with an int\n", line_num);
 		legal_struct = FALSE;
 	}
 	else if(legal_str_direct(string, line_num) == FALSE)
@@ -686,9 +737,6 @@ int legal_int_operand(char operand[], int* out_num, int line_num)
 	return legal_name;
 }
 
-/*==============================================
-this function insert int data to the data array
-===============================================*/
 int insert_num_data(char op_str[], int data_arr[], int* dc)
 {
 	int status = SUCCESS;
@@ -713,9 +761,6 @@ int insert_num_data(char op_str[], int data_arr[], int* dc)
 	return status;
 }
 
-/*==============================================
-this function insert string data to the data array
-===============================================*/
 void insert_str_data(char str[], int data_arr[], int* dc)
 {
 	int length = strlen(str);
@@ -850,11 +895,12 @@ void encode_miss_label(int instruct_arr[], int* ic, char** label_by_index, char 
 
 void encode_operands(int instruct_arr[], int* ic, int source_address_methood, char* op_source1,
 					 char* op_source2, int dest_address_methood, char* op_dest1, char* op_dest2,
-					 char** label_by_index, int label_count)
+					 char** label_by_index, int label_count, list* undefine_labels, label* label_table)
 {
 	int dest;
 	int source;
 	int final_word;
+
 #ifdef PRINT_DEBUG
 	printf("source_address_methood is (%d)\n", source_address_methood);
 	printf("dest_address_methood is (%d)\n", dest_address_methood);
@@ -891,6 +937,13 @@ void encode_operands(int instruct_arr[], int* ic, int source_address_methood, ch
 			}
 			else if(source_address_methood == STRUCT)
 			{
+				/*check if the label is in the label table and store it in undefine label list if not*/
+				if(label_in_table(label_table, label_count, op_source1) == NOT_FOUND)
+				{
+					if(find_in_list(undefine_labels,op_source1) == NULL)/*check if the label is not already in list*/
+						add_node(undefine_labels, op_source1);
+				}
+				
 				encode_miss_label(instruct_arr, ic, label_by_index, op_source1, label_count);
 				*ic = *ic + 1;
 				
@@ -899,7 +952,16 @@ void encode_operands(int instruct_arr[], int* ic, int source_address_methood, ch
 				instruct_arr[*ic] = source;
 			}
 			else
+			{
+				/*check if the label is in the label table and store it in undefine label list if not*/
+				if(label_in_table(label_table, label_count, op_source1) == NOT_FOUND)
+				{
+					if(find_in_list(undefine_labels,op_source1) == NULL)/*check if the label is not already in list*/
+						add_node(undefine_labels, op_source1);
+				}	
 				encode_miss_label(instruct_arr, ic, label_by_index, op_source1, label_count);
+				
+			}
 			
 			*ic = *ic + 1;
 		}
@@ -918,13 +980,27 @@ void encode_operands(int instruct_arr[], int* ic, int source_address_methood, ch
 		}
 		else if(dest_address_methood == STRUCT)
 		{
+			/*check if the label is in the label table and store it in undefine label list if not*/
+			if(label_in_table(label_table, label_count, op_dest1) == NOT_FOUND)
+			{
+				if(find_in_list(undefine_labels,op_dest1) == NULL)/*check if the label is not already in list*/
+					add_node(undefine_labels, op_dest1);
+			}
 			encode_miss_label(instruct_arr, ic, label_by_index, op_dest1, label_count);
 			*ic = *ic + 1; /*save a spot to the label address*/
 			
 			parse_int(op_dest2, &instruct_arr[*ic]);/*encode the field number*/
 		}
 		else
+		{
+			/*check if the label is in the label table and store it in undefine label list if not*/
+			if(label_in_table(label_table, label_count, op_dest1) == NOT_FOUND)
+			{
+				if(find_in_list(undefine_labels,op_dest1) == NULL)/*check if the label is not already in list*/
+					add_node(undefine_labels, op_dest1);
+			}
 			encode_miss_label(instruct_arr, ic, label_by_index, op_dest1, label_count);
+		}	
 		*ic = *ic + 1;
 	}
 }
@@ -962,6 +1038,8 @@ int find_address_methood(char operand[], int* address_methood, int command, int 
 		}
 		else if(legal_label(operand, line_num) == TRUE)
 			*address_methood = DIRECT;
+		else
+			break;
 		
 		status = SUCCESS;
 		
@@ -972,13 +1050,15 @@ int find_address_methood(char operand[], int* address_methood, int command, int 
 
 int parse_line(char data[], label* label_table,int* out_label_index, int* label_count, int* line_type,
 			   int* line_command,char** out_op_source1, char** out_op_source2, char** out_op_dest1,
-			   char** out_op_dest2, int* op_s_address_methood, int* op_d_address_methood, int line_num)
+			   char** out_op_dest2, int* op_s_address_methood, int* op_d_address_methood, int line_num,
+			   list* undefine_labels)
 {
 	char label_name [LINE_SIZE] = {0};
 	int label_index;
 	char command [LINE_SIZE] = {0};
 	char instruction [LINE_SIZE] = {0};
 	int command_scan_status;/*store if the command has operands or not*/
+	node* undefine_label;
 	
 	int parse_operands = FALSE; /*a flag to notife that the line has opernds to parse*/
 	char operands [LINE_SIZE] = {0};
@@ -1013,9 +1093,9 @@ int parse_line(char data[], label* label_table,int* out_label_index, int* label_
 		
 		if(sscanf(data, ".entry %[^\n]", label_name) == 1)
 		{
-#ifdef PRINT_DEBUG_MILESTONE
+#ifdef PRINT_DEBUG
 			printf("this is an entry line. label name is: %s\n", label_name);
-#endif /* PRINT_DEBUG_MILESTONE */
+#endif /* PRINT_DEBUG */
 			
 			if(legal_label(label_name, line_num) == FALSE)
 				break;
@@ -1066,6 +1146,13 @@ int parse_line(char data[], label* label_table,int* out_label_index, int* label_
 					break;
 				}
 			}
+			else 
+			{
+				undefine_label = find_in_list(undefine_labels,label_name);/*check if the label is in list*/
+				
+				if(undefine_label != NULL)
+					delete_node(undefine_labels, undefine_label);
+			}
 			
 			strcpy(label_table[*label_count].name, label_name);
 			label_table[*label_count].is_extern = TRUE;
@@ -1074,7 +1161,7 @@ int parse_line(char data[], label* label_table,int* out_label_index, int* label_
 		}
 		else 
 		{
-			if(sscanf(data, "%[^:]: %[^\n]", label_name, instruction) == 2)
+			if(sscanf(data, "%[^:]: %[^\n]", label_name, instruction) == 2)/*instruction line with a label*/
 			{
 #ifdef PRINT_DEBUG
 				printf("this is an instruction line with a label, label name is: "
@@ -1102,6 +1189,11 @@ int parse_line(char data[], label* label_table,int* out_label_index, int* label_
 				}
 				else
 				{
+					undefine_label = find_in_list(undefine_labels,label_name);/*check if the label is in list*/
+					
+					if(undefine_label != NULL)
+						delete_node(undefine_labels, undefine_label);
+					
 					strcpy(label_table[*label_count].name, label_name); /*copy the label name in to it's place*/
 					label_table[*label_count].is_defined = TRUE;
 					*out_label_index = *label_count;
@@ -1220,8 +1312,9 @@ int parse_line(char data[], label* label_table,int* out_label_index, int* label_
 					if(sscanf(operands, "%[^,],%[^\n]", op_source, op_dest) == 2)
 					{
 						/*find source operand addressing methood*/
-						find_address_methood(op_source, op_s_address_methood, SOURCE, *line_command,
-											 LEA, line_num);
+						if((find_address_methood(op_source, op_s_address_methood, SOURCE, *line_command,
+												 LEA, line_num)) == FAILURE)
+							break;
 						
 						if(*op_s_address_methood == STRUCT_ACCESS)
 						{
@@ -1249,8 +1342,9 @@ int parse_line(char data[], label* label_table,int* out_label_index, int* label_
 						}
 						
 						/*find destination operand addressing methood*/
-						find_address_methood(op_dest, op_d_address_methood, DEST, *line_command,
-											 CMP, line_num);
+						if((find_address_methood(op_dest, op_d_address_methood, DEST, *line_command,
+												 CMP, line_num)) == FAILURE)
+							break;
 						
 						if(*op_d_address_methood == STRUCT_ACCESS)
 						{
@@ -1286,10 +1380,11 @@ int parse_line(char data[], label* label_table,int* out_label_index, int* label_
 				else if(num_of_operands(*line_command) == 1)/*command get one operand*/
 				{
 					strcpy(op_dest, operands);
-					
+
 					/*find destination operand addressing methood*/
-					find_address_methood(op_dest, op_d_address_methood, DEST, *line_command,
-										 PRN, line_num);
+					if((find_address_methood(op_dest, op_d_address_methood, DEST, *line_command,
+											 PRN, line_num)) == FAILURE)
+							break;
 					
 					if(*op_d_address_methood == STRUCT_ACCESS)
 					{

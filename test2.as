@@ -3,7 +3,7 @@ MAIN2:		mov	S1.	1, LENGTH
 		add	r2,STR
 LOOP:		jmp	END
 		macro m1
-			inc	K
+			inc	SSS	
 			
 			mov	S1.2,r3
 		endmacro
@@ -11,12 +11,7 @@ LOOP:		jmp	END
 		sub	r1,r4
 		m1
 		bne	LOOP
-		macro m2 m1
-			inc	LL
-			
-			mov	S1.2,r3
-		endmacro
-		macro .data
+		macro m1
 			inc	LL
 			
 			mov	S1.2,r3

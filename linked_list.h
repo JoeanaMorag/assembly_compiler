@@ -61,6 +61,12 @@ it gets a pointer to the list it needs to print
 ===============================================*/
 void print_list(list* main_list);
 
+/*==============================================
+this function check if a cearten data is store in the list
+it gets a pointer to the list and the data to compare
+===============================================*/
+node* find_in_list(list* main_list, char str[]);
+
 /*===============================================
 this function check if a list is empty
 it gets a pointer to the list it needs to check

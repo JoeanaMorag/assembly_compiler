@@ -1,5 +1,5 @@
 .entry LOOP
-.entry LENGTH
+.entry QQ
 .extern L3
 .extern W
 MAIN:	mov	S1.1, W

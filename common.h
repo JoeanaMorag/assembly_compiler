@@ -1,8 +1,9 @@
 #ifndef _COMMEN_H
 #define _COMMEN_H
 
-/*#define PRINT_DEBUG_MILESTONE*/
-/*#define PRINT_DEBUG*/
+/*a print debugging defenitions*/
+/*#define PRINT_DEBUG_MILESTONE
+#define PRINT_DEBUG*/
 
 #define FAILURE 1
 #define SUCCESS 0
